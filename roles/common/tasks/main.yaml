@@ -1,0 +1,24 @@
+- name: Update apt cache
+  apt:
+    update_cache: yes
+
+- name: Install common dependencies
+  apt:
+    name:
+      - curl
+      - gnupg
+      - build-essential
+      - libssl-dev
+      - libreadline-dev
+      - zlib1g-dev
+      - libpq-dev
+      - git
+      - nginx
+      - autoconf
+      - bison
+      - libyaml-dev
+      - libffi-dev
+      - libgdbm-dev
+      - libncurses5-dev
+      - libtool
+    state: present

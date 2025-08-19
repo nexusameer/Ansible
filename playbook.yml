@@ -1,0 +1,21 @@
+---
+- name: Provision Staging Server for 1review
+  hosts: staging
+  become: true
+
+  vars:
+    ruby_version: "3.2.0"
+    postgres_version: "14"
+    app_user: review
+    app_name: ireview
+    db_name: ireview_staging
+    db_user: ireview
+    db_pass: ireview12345
+
+  roles:
+    - common
+    - user
+    - ruby
+    - postgres
+    - nginx
+

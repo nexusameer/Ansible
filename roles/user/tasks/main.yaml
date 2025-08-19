@@ -1,0 +1,5 @@
+- name: Add deploy user
+  user:
+    name: "{{ app_user }}"
+    shell: /bin/bash
+    create_home: yes

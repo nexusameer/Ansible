@@ -1,0 +1,54 @@
+---
+- name: Ensure /etc/apt/keyrings exists
+  file:
+    path: /etc/apt/keyrings
+    state: directory
+    mode: '0755'
+
+- name: Download PostgreSQL GPG key using curl
+  shell: |
+    curl -fsSL https://www.postgresql.org/media/keys/ACCC4CF8.asc -o /etc/apt/keyrings/postgresql.asc
+  args:
+    creates: /etc/apt/keyrings/postgresql.asc
+
+- name: Add PostgreSQL APT repository
+  apt_repository:
+    repo: "deb [signed-by=/etc/apt/keyrings/postgresql.asc] http://apt.postgresql.org/pub/repos/apt {{ ansible_distribution_release }}-pgdg main"
+    state: present
+    filename: 'pgdg'
+    update_cache: yes
+  register: add_pg_repo
+
+- name: Update apt after PostgreSQL repo
+  apt:
+    update_cache: yes
+  when: add_pg_repo.changed
+
+- name: Install PostgreSQL packages
+  apt:
+    name:
+      - "postgresql-{{ postgres_version }}"
+      - "postgresql-client-{{ postgres_version }}"
+      - python3-psycopg2
+    state: present
+
+- name: Ensure PostgreSQL is started
+  service:
+    name: postgresql
+    state: started
+    enabled: yes
+
+- name: Setup PostgreSQL user
+  become: true
+  become_user: postgres
+  community.postgresql.postgresql_user:
+    name: "{{ db_user }}"
+    password: "{{ db_pass }}"
+    role_attr_flags: CREATEDB
+
+- name: Create database
+  become: true
+  become_user: postgres
+  community.postgresql.postgresql_db:
+    name: "{{ db_name }}"
+    owner: "{{ db_user }}"
